@@ -1,10 +1,6 @@
 # Usage
-Clone or download:
-```bash
-git clone https://github.com/minhhoit/docker-magento2.git
-```
 
-Prepare you HTTPS and custom domain => See: [./vhosts/README.md](./vhosts/README.md)
+Prepare you HTTPS and custom domain => See: [./docker/config/vhosts/README.md](./docker/config/vhosts/vhosts/README.md)
 
 => Example: https://magento2.dev
 
@@ -37,7 +33,7 @@ php bin/magento setup:install \
     --db-host=mysql \
     --db-name=magento_db \
     --db-user=magento \
-    --db-password=root \
+    --db-password=123456 \
     --backend-frontname=backend \
     --admin-firstname=Super \
     --admin-lastname=Admin \
