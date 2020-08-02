@@ -1,0 +1,70 @@
+version: "3"
+services:
+    m2-app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: m2-fpm-service
+        volumes:
+            - ./:/var/www/html/magento2
+        depends_on:
+            - m2-db
+            - m2-redis
+        expose:
+            - "9000"
+        networks:
+            - m2
+    m2-webserver:
+        image: nginx:alpine
+        ports:
+            - "8086:80"
+        volumes:
+            - ./public:/var/www/html/magento2
+            - ./docker/config/nginx/conf.d/:/etc/nginx/conf.d/
+        depends_on:
+            - m2-app
+        networks:
+            - m2
+    m2-db:
+        restart: always
+        image: mysql:5.7
+        container_name: m2-db-service
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        volumes:
+            - ./docker/config/mysql:/var/lib/mysql
+        depends_on:
+            - m2-app
+        networks:
+            - m2
+    m2-varnish:
+        image: varnish:6
+        container_name: m2-varnish-service
+        volumes:
+            - ./docker/config/varnish/default.vcl:/etc/varnish/default.vcl
+        ports:
+            - "8011:80"
+    m2-redis:
+        restart: always
+        image: redis
+        container_name: m2-redis-service
+        expose:
+            - "6379"
+        networks:
+            - m2
+    m2-adminer:
+        restart: always
+        image: adminer
+        volumes:
+            - ./docker/config/adminer/php-custom.ini:/usr/local/etc/php/conf.d/php-custom.ini
+        ports:
+            - "8088:8080"
+        environment:
+            ADMINER_DEFAULT_SERVER: mysql
+            ADMINER_DESIGN: "flat"
+        networks:
+            - m2
+networks:
+    m2:
+        external: true
