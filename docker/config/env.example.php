@@ -20,7 +20,7 @@ return [
                 'host' => 'mysql',
                 'dbname' => 'magento_db',
                 'username' => 'magento',
-                'password' => '123456',
+                'password' => 'magento',
                 'model' => 'mysql4',
                 'engine' => 'innodb',
                 'initStatements' => 'SET NAMES utf8;',
@@ -122,7 +122,7 @@ return [
     ],
     'http_cache_hosts' => [
         [
-            'host' => 'nginx',
+            'host' => 'm2-webserver',
             'port' => '80',
         ],
     ],

@@ -6,12 +6,12 @@ Prepare you HTTPS and custom domain => See: [./docker/config/vhosts/README.md](.
 
 Update or copy file env for docker:
 ```bash
-cp docker/env.example.php ~/Project/magento2/app/etc/env.php
+cp docker/env.example.php ~/Project/m2/app/etc/env.php
 ```
 
 Up and running:
 ```bash
-cd ~/Project/magento2
+cd ~/Project/m2
 docker-compose up -d
 ```
 
@@ -20,7 +20,7 @@ Prepare your magento installation:
 # Enter `php` container
 docker-compose exec m2-app bash
 
-cd /var/www/html/magento2
+cd /var/www/html/m2
 
 # Setup file permissions, except folder `dev/docker`
 find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} + \
@@ -30,10 +30,9 @@ find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {
 # Run this to install db if it is new installation,
 # or you can import your SQL in adminer: http://localhost:8088
 php bin/magento setup:install \
-    --db-host=mysql \
     --db-name=magento_db \
     --db-user=magento \
-    --db-password=123456 \
+    --db-password=magento \
     --backend-frontname=backend \
     --admin-firstname=Super \
     --admin-lastname=Admin \
@@ -44,7 +43,7 @@ php bin/magento setup:install \
 # Update config
 # Config to use varnish
 php bin/magento config:set system/full_page_cache/caching_application 2
-php bin/magento config:set system/full_page_cache/varnish/backend_host nginx
+php bin/magento config:set system/full_page_cache/varnish/backend_host m2-webserver
 php bin/magento config:set system/full_page_cache/varnish/backend_port 80
 # Base url and https
 php bin/magento config:set web/unsecure/base_url http://magento2.dev/

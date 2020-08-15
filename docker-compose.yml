@@ -3,39 +3,39 @@ services:
     m2-app:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: ./Dockerfile
         container_name: m2-fpm-service
+        working_dir: /var/www/html
         volumes:
-            - ./:/var/www/html/magento2
+            - ./:/var/www/html
+            - ./docker/config/php-fpm/conf.d/m2.conf:/usr/local/etc/php-fpm.d/m2.conf
+            - ./docker/config/php-fpm/m2.ini:/usr/local/etc/php/conf.d/m2.ini
         depends_on:
             - m2-db
             - m2-redis
-        expose:
-            - "9000"
         networks:
             - m2
     m2-webserver:
         image: nginx:alpine
+        working_dir: /var/www/html/m2
         ports:
-            - "8086:80"
+            - "8089:80"
         volumes:
-            - ./public:/var/www/html/magento2
+            - ./m2:/var/www/html/m2
             - ./docker/config/nginx/conf.d/:/etc/nginx/conf.d/
         depends_on:
             - m2-app
         networks:
             - m2
     m2-db:
-        restart: always
-        image: mysql:5.7
+        image: mariadb
         container_name: m2-db-service
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
         environment:
-            MYSQL_ROOT_PASSWORD: root
+            - MYSQL_ROOT_PASSWORD=root
         volumes:
-            - ./docker/config/mysql:/var/lib/mysql
-        depends_on:
-            - m2-app
+            - ./docker/config/mysql:/docker-entrypoint-initdb.d
+            - m2-dbdata:/var/lib/mysql
         networks:
             - m2
     m2-varnish:
@@ -46,7 +46,6 @@ services:
         ports:
             - "8011:80"
     m2-redis:
-        restart: always
         image: redis
         container_name: m2-redis-service
         expose:
@@ -54,7 +53,6 @@ services:
         networks:
             - m2
     m2-adminer:
-        restart: always
         image: adminer
         volumes:
             - ./docker/config/adminer/php-custom.ini:/usr/local/etc/php/conf.d/php-custom.ini
@@ -65,6 +63,10 @@ services:
             ADMINER_DESIGN: "flat"
         networks:
             - m2
+        depends_on:
+            - m2-db
 networks:
     m2:
         external: true
+volumes:
+  m2-dbdata:

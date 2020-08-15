@@ -1,4 +1,4 @@
-FROM php:7.3-fpm
+FROM php:7.2-fpm
 
 LABEL maintainer="hoangminh.it4u@gmail.com"
 
@@ -39,21 +39,21 @@ RUN useradd -m -s /bin/bash magento \
 
 RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-ADD ./docker/config/php-fpm/m2.ini $PHP_INI_DIR/conf.d/
-# Crontab for user magento
-ADD ./docker/config/php-fpm/magento.cron /var/spool/cron/crontabs/magento
-RUN chmod 600 /var/spool/cron/crontabs/magento && chgrp crontab /var/spool/cron/crontabs/magento
+ADD ./php-custom.ini $PHP_INI_DIR/conf.d/
 # Custom entrypoint to start cron service
 ADD ./docker/config/php-fpm/m2-entrypoint.sh /usr/local/bin/
 
+# Add virmrc
+ADD .vimrc /root/.vimrc
+ADD .vimrc /home/magento/.vimrc
 # Add some alias
-ADD ./docker/config/php-fpm/.bash_aliases /usr/local/share/.bash_aliases
-# Improve shell prompt: [+] root @ /var/www/html/magento
+ADD .bash_aliases /usr/local/share/.bash_aliases
+# Improve shell prompt: [+] root @ /var/www/html/m2
 RUN printf '\nfunction nonzero_return() { RETVAL=$? ; [ $RETVAL -ne 0 ] && echo "[exit code: $RETVAL]" ; }\n \
     PS1="\n\[\e[37m\][+]\[\e[m\]\[\e[m\] \[\e[32m\]\u\[\e[m\] \[\e[34m\]@\[\e[m\] \[\e[36m\]\w \[\e[31m\]\`nonzero_return\`\[\e[m\]\n\\\$ > "\n \
     . /usr/local/share/.bash_aliases\n' | tee --append /etc/bash.bashrc /home/magento/.bashrc
 
-ENTRYPOINT [ "/usr/local/bin/m2-entrypoint.sh" ]
+ENTRYPOINT ["bash", "/usr/local/bin/m2-entrypoint.sh" ]
 
 CMD ["php-fpm"]
 
